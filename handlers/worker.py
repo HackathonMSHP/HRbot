@@ -10,15 +10,12 @@ from interface.button_keyboard import *
 from interface.inline_keyboard import *
 from interface.templates import *
 from interface.callback_classes import *
-from data.data import *
 from data.data_classes import *
-from constant.option import sphere_option, sphere_callback
 from deepseek_core.middleware_openai import generate
 
 worker_router = Router()
 
-
-@worker_router.message(WorkerState.wait)
+"""@worker_router.message(WorkerState.wait)
 async def flood(message:Message):
     await message.answer("Запрос генерируется.")
 
@@ -69,4 +66,4 @@ async def anketaAbout(message:Message, state: FSMContext):
     await state.set_state(WorkerState.wait)
     response = await generate(message.text)
     await message.answer(response)
-    await state.set_state(None)
+    await state.set_state(None)"""

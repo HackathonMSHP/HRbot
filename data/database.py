@@ -1,5 +1,6 @@
 import aiosqlite
 import json
+import asyncio
 from aiogram import types
 
 DB_NAME = 'work_db.db'
@@ -301,4 +302,3 @@ async def get_all_active_employers():
             }
             for row in rows
         ]
-    

@@ -14,7 +14,7 @@ from data.data_classes import *
 
 employer_router = Router()
 
-@employer_router.callback_query(F.data == "Employer")
+"""@employer_router.callback_query(F.data == "Employer")
 async def anketaStart(callback: CallbackQuery, state: FSMContext):
     await state.set_state(EmployerState.name_company)
     await callback.message.answer("Введите свое имя")
@@ -34,3 +34,4 @@ async def anketaAge(message: Message, state: FSMContext):
         await message.answer("Выберите свою сферу деятельности", reply_markup=kb)
     else:
         await message.answer("Пожалуйста, введите корректный возраст.")
+"""
