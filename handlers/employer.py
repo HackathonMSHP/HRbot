@@ -9,7 +9,7 @@ from interface.button_keyboard import *
 from interface.inline_keyboard import *
 from interface.templates import *
 from interface.callback_classes import *
-from data.data import *
+from data.database import *
 from data.data_classes import *
 
 employer_router = Router()
