@@ -6,36 +6,39 @@ from aiogram.types import CallbackQuery, Message
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 
+from constants.option import *
 from interface.button_keyboard import *
 from interface.inline_keyboard import *
 from interface.templates import *
 from interface.callback_classes import *
 from data.data_classes import *
 from deepseek_core.middleware_openai import generate
+from data.database import *
 
 worker_router = Router()
+temp = {}
 
-"""@worker_router.message(WorkerState.wait)
+@worker_router.message(WorkerState.wait)
 async def flood(message:Message):
     await message.answer("Запрос генерируется.")
 
 @worker_router.callback_query(F.data == "worker")
 async def anketaStart(callback: CallbackQuery, state: FSMContext):
     await state.set_state(WorkerState.name)
+    temp[callback.message.chat.id] = {}
     await callback.message.answer("Введите свое имя")
 
 @worker_router.message(WorkerState.name, F.text)
 async def anketaName(message: Message, state: FSMContext):
-    worker_info[message.chat.id] = message.text
-    print(worker_info[message.chat.id])
+    temp[message.chat.id]["name"] = message.text
     await state.set_state(WorkerState.age)
     await message.answer("Введите свой возраст")
 
 @worker_router.message(WorkerState.age, F.text)
 async def anketaAge(message: Message, state: FSMContext):
     if message.text.isdigit() and 16 <= int(message.text) <= 100:
-        worker_info[message.chat.id] = int(message.text)
-        print(worker_info[message.chat.id])
+        temp[message.chat.id]["age"] = int(message.text)
+        print(temp[message.chat.id])
         #await state.update_data(age=int(message.text))      !!!!!!!!!!!!!!!!!!!!!!!!!!!! возможно выход без использования СУБД, потом уточню логику работы
         await state.set_state(WorkerState.sphere)
         kb = await buildInlineKB(sphere_option, sphere_callback)
@@ -47,8 +50,7 @@ async def anketaAge(message: Message, state: FSMContext):
 async def anketasphere(callback: CallbackQuery, state: FSMContext):
     await state.update_data(sphere=callback.data)
     await callback.message.edit_text(f"Выбрано: {callback.data}")
-    worker_info[callback.message.chat.id] = callback.data
-    print(worker_info[callback.message.chat.id])
+    temp[callback.message.chat.id]["sphere"] = callback.data
     time.sleep(1)
     await state.set_state(WorkerState.work_experience)
     await callback.message.answer("Укажите ваш опыт опыт работы в сфере (в годах)")
@@ -58,12 +60,12 @@ async def anketaExp(message: Message, state: FSMContext):
     if message.text.isdigit() and int(message.text) < 80:
         await state.set_state(WorkerState.about)
         await message.reply("Прекрасно! А теперь напишите пару слов о себе, о важных аспектах компании для вас, о конкретных фреймворках, языках, программах и т.д, опыт работы в которых вы имеете.")
-        worker_info[message.chat.id] = int(message.text)
-        print(worker_info[message.chat.id])
+        temp[message.chat.id]["work_experience"] = int(message.text)
 
 @worker_router.message(WorkerState.about, F.text)
 async def anketaAbout(message:Message, state: FSMContext):
     await state.set_state(WorkerState.wait)
     response = await generate(message.text)
+    temp[message.chat.id]["tags"] = response
     await message.answer(response)
-    await state.set_state(None)"""
+    await state.clear()

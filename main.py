@@ -2,7 +2,7 @@ import asyncio
 import os
 import traceback
 
-from aiogram import Bot
+from aiogram import Bot,Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 
@@ -16,9 +16,9 @@ from data.database import *
 
 
 async def main() -> None:
-    await create_db()
-    #bot = Bot(TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
-    #dp.include_routers(start_router, employer_router, worker_router)
+    dp = Dispatcher()
+    bot = Bot(TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    dp.include_routers(start_router, employer_router, worker_router)
 
 
 if __name__ == "__main__":
