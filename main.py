@@ -17,8 +17,8 @@ from data.database import *
 
 async def main() -> None:
     await create_db()
-    #bot = Bot(TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
-    #dp.include_routers(start_router, employer_router, worker_router)
+    bot = Bot(TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    dp.include_routers(start_router, employer_router, worker_router)
 
 
 if __name__ == "__main__":

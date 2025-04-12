@@ -13,7 +13,7 @@ async def generate(text: str):
     messages=[
         {
         "role": "user",
-        "content": text
+        "content": f"""{text}, """
         }
     ]
     )
