@@ -68,4 +68,4 @@ async def anketaAbout(message:Message, state: FSMContext):
     response = await generate(message.text)
     temp[message.chat.id]["tags"] = response
     await message.answer(response)
-    await state.clear()
+    await state.set_state(WorkerState.find)

@@ -1,17 +1,19 @@
 import asyncio
-
+import time
 from aiogram import F, Router
-from aiogram.filters import *
-from aiogram.types import *
+from aiogram.filters import StateFilter
+from aiogram.types import CallbackQuery, Message
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 
+from constants.option import *
 from interface.button_keyboard import *
 from interface.inline_keyboard import *
 from interface.templates import *
 from interface.callback_classes import *
-from data.database import *
 from data.data_classes import *
+from deepseek_core.middleware_openai import generate
+from data.database import *
 
 employer_router = Router()
 
@@ -31,15 +33,15 @@ async def anketaName(message: Message, state: FSMContext):
 
 @employer_router.message(EmployerState.age, F.text)
 async def anketaAge(message: Message, state: FSMContext):
-    if message.text.split()[0].isdigit() and message.text.split()[0].isdigit():
-        temp[message.chat.id] = int(message.text)
+    if message.text.split()[0].isdigit() and message.text.split()[1].isdigit():
+        temp[message.chat.id] = list(map(int, (message.text).split()))
         await state.set_state(EmployerState.sphere)
-        kb = await buildInlineKB(sphere, sphere)
+        kb = await buildInlineKB(sphere_option, sphere_callback)
         await message.answer("Выберите свою сферу деятельности", reply_markup=kb)
     else:
         await message.answer("Пожалуйста, введите корректный возраст.")
     
-@employer_router.callback_query(F.data.in_(sphere))
+@employer_router.callback_query(F.data.in_(sphere_callback))
 async def anketaStart(callback: CallbackQuery, state: FSMContext):
     await state.set_state(EmployerState.work_experience)
     await callback.message.answer("Введите опыт работы кандидата минимум и максимум через пробел в месяцах")
@@ -57,4 +59,6 @@ async def anketaWorkExperience(message: Message, state: FSMContext):
 async def anketaAbout(message: Message, state: FSMContext):
     temp[message.chat.id]["about"] = message.text
     await state.set_state(EmployerState.find)
-    await message.answer("Введите хештеги кандидата через пробел")
+    response = await generate(message.text)
+    temp[message.chat.id]["tags"] = response
+    await message.answer(response)
