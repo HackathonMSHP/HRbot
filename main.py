@@ -12,7 +12,6 @@ from handlers.worker import worker_router
 #from utils.bot_dispatcher import create_dispatcher
 #from utils.db_connector import create_tables #, delete_tables, recreate_tables
 from constants.config import TOKEN
-from data.database import *
 
 
 async def main() -> None:

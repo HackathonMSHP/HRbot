@@ -43,7 +43,6 @@ class EmployerState(StatesGroup):
     name_company = State()
     age = State()
     sphere = State()
-    gender = State()
     status = State()
     work_experience = State()
     about = State()
