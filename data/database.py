@@ -41,6 +41,8 @@ async def create_db():
         ''')
         await db.commit()
 
+# ========== Worker CRUD Operations ==========
+
 async def add_worker(
     worker_id: int,
     name: str,
@@ -114,6 +116,40 @@ async def update_worker_status(worker_id: int, new_status: str):
         )
         await db.commit()
 
+async def add_to_worker_likes(worker_id: int, liked_id: int):
+    """Добавляем ID в likes работника"""
+    async with aiosqlite.connect(DB_NAME) as db:
+        cursor = await db.execute('SELECT likes FROM workers WHERE id = ?', (worker_id,))
+        row = await cursor.fetchone()
+        current_likes = json.loads(row[0]) if row and row[0] else []
+        
+        if liked_id not in current_likes:
+            current_likes.append(liked_id)
+            await db.execute(
+                'UPDATE workers SET likes = ? WHERE id = ?',
+                (json.dumps(current_likes), worker_id)
+            )
+            await db.commit()
+            return True
+        return False
+
+async def add_to_worker_was_likes(worker_id: int, liked_by_id: int):
+    """Добавляем ID в was_likes работника"""
+    async with aiosqlite.connect(DB_NAME) as db:
+        cursor = await db.execute('SELECT was_likes FROM workers WHERE id = ?', (worker_id,))
+        row = await cursor.fetchone()
+        current_was_likes = json.loads(row[0]) if row and row[0] else []
+        
+        if liked_by_id not in current_was_likes:
+            current_was_likes.append(liked_by_id)
+            await db.execute(
+                'UPDATE workers SET was_likes = ? WHERE id = ?',
+                (json.dumps(current_was_likes), worker_id)
+            )
+            await db.commit()
+            return True
+        return False
+
 # ========== Employer CRUD Operations ==========
 
 async def add_employer(
@@ -185,6 +221,40 @@ async def get_employer(employer_id: int) -> dict:
             }
         return None
 
+async def add_to_employer_likes(employer_id: int, liked_id: int):
+    """Добавляем ID в likes работодателя"""
+    async with aiosqlite.connect(DB_NAME) as db:
+        cursor = await db.execute('SELECT likes FROM employers WHERE id = ?', (employer_id,))
+        row = await cursor.fetchone()
+        current_likes = json.loads(row[0]) if row and row[0] else []
+        
+        if liked_id not in current_likes:
+            current_likes.append(liked_id)
+            await db.execute(
+                'UPDATE employers SET likes = ? WHERE id = ?',
+                (json.dumps(current_likes), employer_id)
+            )
+            await db.commit()
+            return True
+        return False
+
+async def add_to_employer_was_likes(employer_id: int, liked_by_id: int):
+    """Добавляем ID в was_likes работодателя"""
+    async with aiosqlite.connect(DB_NAME) as db:
+        cursor = await db.execute('SELECT was_likes FROM employers WHERE id = ?', (employer_id,))
+        row = await cursor.fetchone()
+        current_was_likes = json.loads(row[0]) if row and row[0] else []
+        
+        if liked_by_id not in current_was_likes:
+            current_was_likes.append(liked_by_id)
+            await db.execute(
+                'UPDATE employers SET was_likes = ? WHERE id = ?',
+                (json.dumps(current_was_likes), employer_id)
+            )
+            await db.commit()
+            return True
+        return False
+
 # ========== Common Operations ==========
 
 async def get_all_active_workers():
@@ -231,3 +301,4 @@ async def get_all_active_employers():
             }
             for row in rows
         ]
+    
