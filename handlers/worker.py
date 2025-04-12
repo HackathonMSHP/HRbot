@@ -42,7 +42,7 @@ async def anketaAge(message: Message, state: FSMContext):
         #await state.update_data(age=int(message.text))      !!!!!!!!!!!!!!!!!!!!!!!!!!!! возможно выход без использования СУБД, потом уточню логику работы
         await state.set_state(WorkerState.sphere)
         kb = await buildInlineKB(sphere_option, sphere_callback)
-        await message.answer("Выберите свою сферу деятельности", reply_markup=kb)
+        await message.answer("Выберите свою направление", reply_markup=kb)
     else:
         await message.answer("Пожалуйста, введите корректный возраст.")
 
@@ -54,7 +54,7 @@ async def anketasphere(callback: CallbackQuery, state: FSMContext):
     print(worker_info[callback.message.chat.id])
     time.sleep(1)
     await state.set_state(WorkerState.work_experience)
-    await callback.message.answer("Укажите ваш опыт опыт работы в сфере (в годах)")
+    await callback.message.answer("Укажите ваш опыт опыт работы в сфере (в месяцах)")
 
 @worker_router.message(WorkerState.work_experience, F.text)
 async def anketaExp(message: Message, state: FSMContext):
