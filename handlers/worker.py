@@ -6,6 +6,7 @@ from aiogram.types import CallbackQuery, Message
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 
+from constants.option import *
 from interface.button_keyboard import *
 from interface.inline_keyboard import *
 from interface.templates import *

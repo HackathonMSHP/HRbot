@@ -2,9 +2,10 @@ from openai import AsyncOpenAI
 #from core.config import AI_TOKEN
 
 
-file = open("text.txt", 'r')
-file = file.readline()
-file.split(" ")
+b = open("deepseek_core/text.txt", 'r')
+file = b.readline()
+file = file.split(" ")
+b.close()
 client = AsyncOpenAI(
   base_url="https://openrouter.ai/api/v1",
   api_key="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",
