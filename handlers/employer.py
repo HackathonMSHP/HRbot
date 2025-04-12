@@ -17,7 +17,7 @@ employer_router = Router()
 
 temp = {}
 
-@employer_router.callback_query(F.data == "Employer")
+@employer_router.callback_query(F.data == "employer")
 async def anketaStart(callback: CallbackQuery, state: FSMContext):
     await state.set_state(EmployerState.name_company)
     await callback.message.answer("Введите название компании")
