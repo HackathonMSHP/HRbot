@@ -18,9 +18,9 @@ async def create_db():
                 about TEXT,
                 status TEXT DEFAULT 'pause',
                 work_experience INTEGER,
-                tags TEXT, 
-                likes TEXT, 
-                was_likes TEXT 
+                tags TEXT,  # JSON массив
+                likes TEXT,  # JSON массив
+                was_likes TEXT  # JSON массив
             )
         ''')
         
@@ -35,9 +35,9 @@ async def create_db():
                 status TEXT DEFAULT 'pause',
                 work_experience_min INTEGER,
                 work_experience_max INTEGER,
-                need_tags TEXT,
-                likes TEXT,
-                was_likes TEXT
+                need_tags TEXT,  # JSON массив
+                likes TEXT,      # JSON массив
+                was_likes TEXT   # JSON массив
             )
         ''')
         await db.commit()
