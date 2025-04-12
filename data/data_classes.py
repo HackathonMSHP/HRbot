@@ -1,10 +1,6 @@
-from aiogram import F, Router
-from aiogram.filters import StateFilter
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.fsm.context import FSMContext
 
 class Worker:
-    type = "worker"
     name = ""
     age = ""
     sphere = ""
@@ -12,10 +8,11 @@ class Worker:
     about = ""
     status = "pause"
     work_experience = 0
-    hashtags = []
+    tags = []
+    likes = []
+    was_likes = []
 
 class Employer:
-    type = "Employer"
     name_company = ""
     age_min = ""
     age_max = ""
@@ -24,8 +21,9 @@ class Employer:
     status = "pause"
     work_experience_min = ""
     work_experience_max = ""
-    hashtags = {}
-    mandatory = {}
+    need_tags = []
+    likes = []
+    was_likes = []
 
 class WorkerState(StatesGroup):
     wait = State()
