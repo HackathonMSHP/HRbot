@@ -23,10 +23,4 @@ async def main() -> None:
 
 if __name__ == "__main__":
     print("Стартуем бота ...")
-    try:
-        asyncio.run(main())
-    except (KeyboardInterrupt, SystemExit):
-        # Позволяем корректно завершить программу при Ctrl+C или выходе из системы
-        print("Бот остановлен!")
-    except Exception:
-        print(f"Ошибка!: {traceback.format_exc()}")
+    asyncio.run(main())
