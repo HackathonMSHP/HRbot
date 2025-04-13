@@ -74,7 +74,7 @@ async def anketaAbout(message:Message, state: FSMContext):
 async def anketaFind(callback: CallbackQuery, state: FSMContext):
     print(callback.data)
     if callback.data == "retry":
-        response = await generate(callback.text)
+        response = await generate(callback.message.text)
         temp[callback.message.chat.id]["tags"] = response
         await callback.message.answer(f"Мы определили ваши навыки так: {response}")
         kb = await buildInlineKB(["Сгенерировать снова", "Переписать свое резюме", "Все верно"], ["retry", "rewrite", "continue"], 1)
