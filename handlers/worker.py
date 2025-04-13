@@ -78,10 +78,7 @@ async def anketaFind(callback: CallbackQuery, state: FSMContext):
         response = await generate(callback.text)
         temp[callback.message.chat.id]["tags"] = response
         await callback.message.answer(f"Мы определили ваши навыки так: {response}")
-<<<<<<< HEAD
         kb = await buildInlineKB(["Попробовать снова", "Переписать текст", "Все верно"], ["retry", "rewrite", "continue"], 1)
-=======
->>>>>>> 7b9630b7d776d29ed7ab66b176b5c88efce22394
         kb = await buildInlineKB(["Сгенерировать снова", "Переписать свое резюме", "Все верно"], ["retry", "rewrite", "continue"], 1)
         await callback.message.answer("все верно?", reply_markup=kb)
     elif callback.data == "rewrite":

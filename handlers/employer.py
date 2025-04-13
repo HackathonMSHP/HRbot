@@ -43,9 +43,14 @@ async def anketaAge(message: Message, state: FSMContext):
     
 @employer_router.callback_query(F.data.in_(sphere_callback), StateFilter(EmployerState.sphere))
 async def anketaStart(callback: CallbackQuery, state: FSMContext):
-    await state.set_state(EmployerState.work_experience)
+ 
+    await callback.message.edit_text(f"Выбрано: {callback.data}")
+    temp[callback.message.chat.id]["sphere"] = callback.data
+    time.sleep(1)
     await callback.message.answer("Введите опыт работы кандидата минимум и максимум через пробел в месяцах")
+    await state.set_state(EmployerState.work_experience)
 
+    
 @employer_router.message(EmployerState.work_experience, F.text)
 async def anketaWorkExperience(message: Message, state: FSMContext):
     if message.text.split()[0].isdigit() and message.text.split()[1].isdigit():
