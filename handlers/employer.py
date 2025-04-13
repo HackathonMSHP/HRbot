@@ -41,7 +41,7 @@ async def anketaAge(message: Message, state: FSMContext):
     else:
         await message.answer("Пожалуйста, введите корректный возраст.")
     
-@employer_router.callback_query(F.data.in_(sphere_callback))
+@employer_router.callback_query(F.data.in_(sphere_callback), StateFilter(EmployerState.sphere))
 async def anketaStart(callback: CallbackQuery, state: FSMContext):
     await state.set_state(EmployerState.work_experience)
     await callback.message.answer("Введите опыт работы кандидата минимум и максимум через пробел в месяцах")

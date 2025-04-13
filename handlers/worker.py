@@ -46,7 +46,7 @@ async def anketaAge(message: Message, state: FSMContext):
     else:
         await message.answer("Пожалуйста, введите корректный возраст.")
 
-@worker_router.callback_query(F.data.in_(sphere_callback))
+@worker_router.callback_query(F.data.in_(sphere_callback), StateFilter(WorkerState.sphere))
 async def anketasphere(callback: CallbackQuery, state: FSMContext):
     await state.update_data(sphere=callback.data)
     await callback.message.edit_text(f"Выбрано: {callback.data}")
@@ -57,7 +57,7 @@ async def anketasphere(callback: CallbackQuery, state: FSMContext):
 
 @worker_router.message(WorkerState.work_experience, F.text)
 async def anketaExp(message: Message, state: FSMContext):
-    if message.text.isdigit() and int(message.text) < 80:
+    if message.text.isdigit():
         await state.set_state(WorkerState.about)
         await message.reply("Прекрасно! А теперь напишите пару слов о себе, о важных аспектах компании для вас, о конкретных фреймворках, языках, программах и т.д, опыт работы в которых вы имеете.")
         temp[message.chat.id]["work_experience"] = int(message.text)

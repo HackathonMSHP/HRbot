@@ -12,7 +12,7 @@ from interface.callback_classes import *
 
 start_router = Router()
 
-@start_router.message(Command("start"))
+@start_router.message(Command("start"), StateFilter(None))
 async def start(message: Message):
     kb = await buildInlineKB(["Найти работу", "Найти работника"], ["worker", "employer"])
     await message.answer("Привет, мы поможем тебе найти работу или работника, но для начала выбери, что тебе нужно", reply_markup=kb)
