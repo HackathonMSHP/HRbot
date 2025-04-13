@@ -1,5 +1,4 @@
 from data.database import *
-from main import bot
 
 async def show_worker_profile(chat_id):
     worker = await get_worker(chat_id)
