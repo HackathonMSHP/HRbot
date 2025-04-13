@@ -102,5 +102,5 @@ async def anketaFind(callback: CallbackQuery, state: FSMContext):
         await state.set_state(WorkerState.find)
         await callback.message.answer("Начинаю поиск вакансий")
         await callback.message.answer("Ваш профиль успешно сохранён!")
-        show_worker_profile(callback.message.chat.id)
+        await callback.message.answer(show_worker_profile(callback.message.chat.id))
 

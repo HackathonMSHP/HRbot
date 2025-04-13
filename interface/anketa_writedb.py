@@ -1,7 +1,7 @@
 from data.database import *
 from main import bot
 
-async def show_worker_profile(chat_id, kb = None):
+async def show_worker_profile(chat_id):
     worker = await get_worker(chat_id)
     
     profile_text = (
@@ -14,9 +14,9 @@ async def show_worker_profile(chat_id, kb = None):
         f"📝 О себе: {worker['about'] if worker['about'] else 'Не указано'}\n"
     )
     
-    bot.send_message(chat_id, profile_text, reply_markup=kb)
+    return profile_text
 
-async def show_employer_profile(chat_id, kb = None):
+async def show_employer_profile(chat_id):
     employer = await get_employer(chat_id)
     
     profile_text = (
@@ -28,4 +28,4 @@ async def show_employer_profile(chat_id, kb = None):
         f"Навыки: {', '.join(employer['need_tags']) if employer['need_tags'] else 'Не указаны'}\n"
     )
 
-    bot.send_message(chat_id, profile_text, reply_markup=kb)
+    return profile_text
