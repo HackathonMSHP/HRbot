@@ -21,10 +21,10 @@ async def show_employer_profile(chat_id):
     
     profile_text = (
         f"<b>Профиль работодателя</b>\n\n"
-        f"{employer['name_company']}"
-        f"Границы возраста {employer['age_min']}-{employer["age_max"]}\n"
+        f"{employer['name_company']}\n"
+        f"Границы возраста {employer['age_min']}-{employer['age_max']}\n"
         f"Сфера деятельности: {employer['sphere']}\n"
-        f"Опыт от {employer["work_experience_min"]} до {employer["work_experience_max"]}\n"
+        f"Опыт от {employer['work_experience_min']} до {employer['work_experience_max']} месяцев\n"
         f"Навыки: {', '.join(employer['need_tags']) if employer['need_tags'] else 'Не указаны'}\n"
     )
 
