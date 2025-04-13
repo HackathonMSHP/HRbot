@@ -19,6 +19,7 @@ from data.temp import initialize_data
 async def main() -> None:
     dp = Dispatcher()
     bot = Bot(TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    # await create_db()
     dp.include_routers(start_router, employer_router, worker_router)
     await initialize_data()
     await dp.start_polling(bot)
