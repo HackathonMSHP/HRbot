@@ -7,7 +7,7 @@ async def find_koef(id_worker, id_employer):
     koef = 0
 
     for tag in worker.tags:
-        if t in employer.tags:
+        if tag in employer.tags:
             koef += 1
 
     if (employer.age_min <= worker.age <= employer.age_max):
