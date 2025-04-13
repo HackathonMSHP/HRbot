@@ -7,6 +7,7 @@ workers = {}
 koefs = {}
 
 async def initialize_data():
+    """Initialize the dictionaries with data from the database"""
     global employers, workers
     
     active_workers = await get_all_active_workers()
@@ -29,10 +30,13 @@ async def find_best_workers_for_employer(employer_id: int, limit: int) -> list[d
         employers[employer_id] = employer
     
     employer_tags = employer["need_tags"]
+    skipped_ids = set(employer.get("skipped", []))
     
     scored_workers = []
     for worker_id, worker in workers.items():
         if worker["status"] != "active":
+            continue
+        if worker_id in skipped_ids:
             continue
         score = match_score(worker["tags"], employer_tags)
         scored_workers.append((worker, score))
@@ -53,13 +57,34 @@ async def find_best_jobs_for_worker(worker_id: int, limit: int) -> list[dict]:
         workers[worker_id] = worker
     
     worker_tags = worker["tags"]
+    skipped_ids = set(worker.get("skipped", []))
     
     scored_jobs = []
     for employer_id, employer in employers.items():
         if employer["status"] != "active":
+            continue
+        if employer_id in skipped_ids:
             continue
         score = match_score(worker_tags, employer["need_tags"])
         scored_jobs.append((employer, score))
     
     scored_jobs.sort(key=lambda x: x[1], reverse=True)    
     return [employer for employer, score in scored_jobs[:limit]]
+
+async def skip_worker(employer_id: int, worker_id: int):
+    """Add worker to employer's skipped list"""
+    success = await add_to_employer_skipped(employer_id, worker_id)
+    if success and employer_id in employers:
+        if "skipped" not in employers[employer_id]:
+            employers[employer_id]["skipped"] = []
+        employers[employer_id]["skipped"].append(worker_id)
+    return success
+
+async def skip_employer(worker_id: int, employer_id: int):
+    """Add employer to worker's skipped list"""
+    success = await add_to_worker_skipped(worker_id, employer_id)
+    if success and worker_id in workers:
+        if "skipped" not in workers[worker_id]:
+            workers[worker_id]["skipped"] = []
+        workers[worker_id]["skipped"].append(employer_id)
+    return success
