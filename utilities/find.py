@@ -1,19 +1,12 @@
 from data.database import *
 
-async def find_koef(id_worker, id_employer):
-    worker = await get_worker(id_worker)
-    employer = await get_employer(id_employer)
-
-    koef = 0
-
-    for tag in worker.tags:
-        if tag in employer.tags:
-            koef += 1
-
-    if (employer.age_min <= worker.age <= employer.age_max):
-        koef += 3
-
-    if (not employer.work_experience_min <= worker.work_experience <= employer.work_experience_max):
-        koef -= 5
-
-    return koef
+def match_score(worker_tags: list, employer_need_tags: list) -> float:
+    if not worker_tags or not employer_need_tags:
+        return 0.0
+    set_worker = set(worker_tags)
+    set_employer = set(employer_need_tags)
+    
+    intersection = set_worker & set_employer
+    union = set_worker | set_employer
+    
+    return len(intersection) / len(union) if union else 0.0
