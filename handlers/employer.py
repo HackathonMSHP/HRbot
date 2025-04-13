@@ -1,25 +1,23 @@
 import asyncio
-import time
 from aiogram import F, Router
 from aiogram.filters import StateFilter
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, Message, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
+from aiogram.filters import StateFilter
+from aiogram.filters.command import Command
 
 from constants.option import *
-from interface.button_keyboard import *
-from interface.inline_keyboard import *
-from interface.templates import *
-from interface.callback_classes import *
-from data.data_classes import *
+from interface.inline_keyboard import buildInlineKB
 from deepseek_core.middleware_openai import generate
-from data.database import *
-from data.temp import *
+from data.database import add_employer, get_employer
 from utilities.find import *
-from interface.anketa_writedb import *
+from interface.anketa_writedb import show_worker_profile
+from data.data_classes import *
+from data.temp import *
+
 
 employer_router = Router()
-
 tt = {}
 
 @employer_router.callback_query(F.data == "employer")
@@ -51,7 +49,7 @@ async def anketaAge(message: Message, state: FSMContext):
             await state.update_data(age_min=age_min, age_max=age_max)
             await state.set_state(EmployerState.sphere)
             kb = await buildInlineKB(sphere_option, sphere_callback)
-            await message.answer("Выберите свою сферу деятельности", reply_markup=kb)
+            await message.answer("Выберите сферу деятельности", reply_markup=kb)
         else:
             await message.answer("Пожалуйста, введите корректный возраст (мин ≥ 16, макс ≥ мин).")
     except (ValueError, IndexError):
@@ -63,19 +61,22 @@ async def anketaSphere(callback: CallbackQuery, state: FSMContext):
     await state.set_state(EmployerState.work_experience)
     await callback.message.edit_text(
         f"Выбрано: {callback.data}\n"
-        "Введите опыт работы кандидата минимум и максимум через пробел в месяцах"
+        "Введите минимальный и максимальный опыт работы кандидата через пробел (в месяцах)"
     )
 
 @employer_router.message(StateFilter(EmployerState.work_experience), F.text)
 async def anketaWorkExperience(message: Message, state: FSMContext):
     try:
         exp_min, exp_max = map(int, message.text.split())
-        await state.update_data(
-            work_experience_min=exp_min,
-            work_experience_max=exp_max
-        )
-        await state.set_state(EmployerState.about)
-        await message.answer("Введите описание вакансии")
+        if exp_min >= 0 and exp_max >= exp_min:
+            await state.update_data(
+                work_experience_min=exp_min,
+                work_experience_max=exp_max
+            )
+            await state.set_state(EmployerState.about)
+            await message.answer("Введите описание вакансии")
+        else:
+            await message.answer("Пожалуйста, введите корректные значения (мин ≥ 0, макс ≥ мин).")
     except (ValueError, IndexError):
         await message.answer("Пожалуйста, введите два числа через пробел (мин макс).")
 
@@ -134,17 +135,18 @@ async def anketaConfirm(callback: CallbackQuery, state: FSMContext):
                 status="find"
             )
             await callback.message.answer("Ваша анкета успешно сохранена!")
-            await state.clear()
+            await callback.message.answer("Начинаю поиск работников после /find")
+            await state.set_state(EmployerState.find)
         except Exception as e:
             await callback.message.answer(f"Ошибка при сохранении: {str(e)}")
 
-@employer_router.message(EmployerState.find, F.text)
+@employer_router.message(EmployerState.find, Command("find"))
 async def Find(message: Message, state: FSMContext):
     await state.set_state(EmployerState.find)
     await message.answer("Начинаю поиск работников")
     
     employer_id = message.chat.id
-    workers_list = await find_best_workers_for_employer(employer_id)
+    workers_list = await find_best_workers_for_employer(employer_id, limit=10)
     tt[employer_id] = workers_list
     
     if not workers_list:
@@ -164,13 +166,16 @@ async def Find(message: Message, state: FSMContext):
              InlineKeyboardButton(text="👎 Скип", callback_data=f"skip_wrk_{worker['id']}")]
         ])
         
+        worker_profile = await show_worker_profile(worker["id"])
+        
         await message.answer(
-            show_worker_profile(worker),
+            worker_profile,
             reply_markup=keyboard
         )
         return
     
     await message.answer("Больше подходящих работников нет")
+
 
 @employer_router.callback_query(lambda c: c.data.startswith("like_wrk_"))
 async def like_worker(callback: CallbackQuery):

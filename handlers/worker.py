@@ -5,6 +5,8 @@ from aiogram.filters import StateFilter
 from aiogram.types import CallbackQuery, Message
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
+from aiogram.filters.command import Command
+
 
 from constants.option import *
 from interface.button_keyboard import *
@@ -100,14 +102,14 @@ async def anketaFind(callback: CallbackQuery, state: FSMContext):
         )
         
         await state.set_state(WorkerState.find)
-        await callback.message.answer("Начину поиск вакансий как только что-то отправите(капча)")
+        await callback.message.answer("Начину поиск вакансий как только что-то отправите /find")
         workers[callback.message.chat.id] = await get_worker(callback.message.chat.id)
         await callback.message.answer("Ваш профиль успешно сохранён!")
         await callback.message.answer(await show_worker_profile(callback.message.chat.id))
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-@worker_router.message(WorkerState.find, F.text)
+@worker_router.message(WorkerState.find, Command("find"))
 async def Find(message: Message, state: FSMContext):
     await state.set_state(WorkerState.find)
     await message.answer("Начинаю поиск вакансий")
