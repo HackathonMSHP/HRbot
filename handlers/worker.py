@@ -100,8 +100,8 @@ async def anketaFind(callback: CallbackQuery, state: FSMContext):
         )
         
         await state.set_state(WorkerState.find)
-        await callback.message.answer("Начинаю поиск вакансий")
-        workers.append(callback.message.chat.id)
+        await callback.message.answer("Начину поиск вакансий как только что-то отправите(капча)")
+        workers[callback.message.chat.id] = await get_worker(callback.message.chat.id)
         await callback.message.answer("Ваш профиль успешно сохранён!")
         await callback.message.answer(await show_worker_profile(callback.message.chat.id))
 
@@ -113,14 +113,17 @@ async def Find(message: Message, state: FSMContext):
     await message.answer("Начинаю поиск вакансий")
     
     worker_id = message.chat.id
-    jobs = await find_best_jobs_for_worker(worker_id)
+    if worker_id not in workers:
+        workers[worker_id] = await get_worker(worker_id)
+    
+    jobs = await find_best_jobs_for_worker(worker_id=worker_id, limit=100)
     tt[worker_id] = jobs
     
     if not jobs:
         await message.answer("Подходящих вакансий не найдено")
         return
     
-    worker = await get_worker(worker_id)
+    worker = workers[worker_id]
     skipped = set(worker.get("skipped", []))
     liked = set(worker.get("likes", []))
     
@@ -140,6 +143,7 @@ async def Find(message: Message, state: FSMContext):
         return
     
     await message.answer("Больше подходящих вакансий нет")
+
 
 @worker_router.callback_query(lambda c: c.data.startswith("like_emp_"))
 async def like_employer(callback: CallbackQuery):
