@@ -76,14 +76,28 @@ async def anketaAbout(message:Message, state: FSMContext):
 async def anketaFind(callback: CallbackQuery, state: FSMContext):
     if callback.data == "retry":
         response = await generate(callback.text)
-        temp[callback.chat.id]["tags"] = response
-        await callback.answer(f"Мы определили ваши навыки так: {response}")
-        await state.set_state(WorkerState.wait)
+        temp[callback.message.chat.id]["tags"] = response
+        await callback.message.answer(f"Мы определили ваши навыки так: {response}")
         kb = await buildInlineKB(["Попробывать снова", "Переписать текст", "Все верно"], ["retry", "rewrite", "continue"], 1)
-        await callback.answer("все верно?", reply_markup=kb)
+        await callback.message.answer("все верно?", reply_markup=kb)
     elif callback.data == "rewrite":
         await state.set_state(WorkerState.about)
-        await callback.message.answer("Напишите пару слов о себе, о важных аспектах компании для вас, о конкретных фреймворках, языках, программах и т.д, опыт работы в которых вы имеете.")
+        await callback.message.answer("Напишите пару слов о себе...")
     else:
+        worker_data = temp[callback.message.chat.id]
+        
+        await add_worker(
+            worker_id=callback.message.chat.id,
+            name=worker_data["name"],
+            age=worker_data["age"],
+            sphere=worker_data["sphere"],
+            gender="",
+            about=worker_data.get("about", ""),
+            work_experience=worker_data["work_experience"],
+            tags=worker_data["tags"],
+            status="active"
+        )
+        
         await state.set_state(WorkerState.find)
         await callback.message.answer("Начинаю поиск вакансий")
+        await callback.message.answer("Ваш профиль успешно сохранён!")
