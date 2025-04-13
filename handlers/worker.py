@@ -72,7 +72,7 @@ async def anketaAbout(message:Message, state: FSMContext):
     kb = await buildInlineKB(["Попробывать снова", "Переписать текст", "Все верно"], ["retry", "rewrite", "continue"], 1)
     await message.answer("все верно?", reply_markup=kb)
 
-@worker_router.callback_query(F.data.in_(["retry", "rewrite", "continue"]), StateFilter(WorkerState.find))
+@worker_router.callback_query(F.data.in_(["retry", "rewrite", "continue"]), StateFilter(WorkerState.wait))
 async def anketaFind(callback: CallbackQuery, state: FSMContext):
     if callback.data == "retry":
         response = await generate(callback.text)
