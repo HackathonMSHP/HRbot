@@ -9,18 +9,11 @@ from constants.option import *
 from interface.inline_keyboard import buildInlineKB
 from deepseek_core.middleware_openai import generate
 from data.database import add_employer, get_employer
-from utilities.find import find_best_workers_for_employer
-from interface.templates import show_worker_profile
+from utilities.find import *
+from interface.anketa_writedb import show_worker_profile
+from data.data_classes import *
+from data.temp import *
 
-# Define Employer States
-class EmployerState(StatesGroup):
-    name_company = State()
-    age = State()
-    sphere = State()
-    work_experience = State()
-    about = State()
-    wait = State()
-    find = State()
 
 employer_router = Router()
 tt = {}
@@ -140,7 +133,7 @@ async def anketaConfirm(callback: CallbackQuery, state: FSMContext):
                 status="find"
             )
             await callback.message.answer("Ваша анкета успешно сохранена!")
-            await state.clear()
+            await state.set_state(EmployerState.find)
         except Exception as e:
             await callback.message.answer(f"Ошибка при сохранении: {str(e)}")
 
@@ -150,7 +143,7 @@ async def Find(message: Message, state: FSMContext):
     await message.answer("Начинаю поиск работников")
     
     employer_id = message.chat.id
-    workers_list = await find_best_workers_for_employer(employer_id)
+    workers_list = await find_best_workers_for_employer(employer_id, limit=10)
     tt[employer_id] = workers_list
     
     if not workers_list:
@@ -170,13 +163,16 @@ async def Find(message: Message, state: FSMContext):
              InlineKeyboardButton(text="👎 Скип", callback_data=f"skip_wrk_{worker['id']}")]
         ])
         
+        worker_profile = await show_worker_profile(worker["id"])
+        
         await message.answer(
-            show_worker_profile(worker),
+            worker_profile,
             reply_markup=keyboard
         )
         return
     
     await message.answer("Больше подходящих работников нет")
+
 
 @employer_router.callback_query(lambda c: c.data.startswith("like_wrk_"))
 async def like_worker(callback: CallbackQuery):
