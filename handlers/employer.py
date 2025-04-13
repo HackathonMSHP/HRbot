@@ -49,7 +49,7 @@ async def anketaStart(callback: CallbackQuery, state: FSMContext):
 @employer_router.message(EmployerState.work_experience, F.text)
 async def anketaWorkExperience(message: Message, state: FSMContext):
     if message.text.split()[0].isdigit() and message.text.split()[1].isdigit():
-        temp[message.chat.id]["work_experience"] = message.text
+        temp[message.chat.id]["employer_experience"] = message.text
         await state.set_state(EmployerState.about)
         await message.answer("Введите описание")
     else:
