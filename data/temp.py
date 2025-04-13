@@ -7,7 +7,6 @@ workers = {}
 koefs = {}
 
 async def initialize_data():
-    """Initialize the dictionaries with data from the database"""
     global employers, workers
     
     active_workers = await get_all_active_workers()
@@ -72,7 +71,6 @@ async def find_best_jobs_for_worker(worker_id: int, limit: int) -> list[dict]:
     return [employer for employer, score in scored_jobs[:limit]]
 
 async def skip_worker(employer_id: int, worker_id: int):
-    """Add worker to employer's skipped list"""
     success = await add_to_employer_skipped(employer_id, worker_id)
     if success and employer_id in employers:
         if "skipped" not in employers[employer_id]:
@@ -81,7 +79,6 @@ async def skip_worker(employer_id: int, worker_id: int):
     return success
 
 async def skip_employer(worker_id: int, employer_id: int):
-    """Add employer to worker's skipped list"""
     success = await add_to_worker_skipped(worker_id, employer_id)
     if success and worker_id in workers:
         if "skipped" not in workers[worker_id]:

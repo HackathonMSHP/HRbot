@@ -15,6 +15,7 @@ from data.data_classes import *
 from deepseek_core.middleware_openai import generate
 from data.database import *
 from interface.anketa_writedb import *
+from data.temp import *
 
 worker_router = Router()
 temp = {}
@@ -99,6 +100,12 @@ async def anketaFind(callback: CallbackQuery, state: FSMContext):
         
         await state.set_state(WorkerState.find)
         await callback.message.answer("Начинаю поиск вакансий")
+        workers.append(callback.message.chat.id)
         await callback.message.answer("Ваш профиль успешно сохранён!")
         await callback.message.answer(await show_worker_profile(callback.message.chat.id))
 
+@worker_router.message(WorkerState.find, F.text)
+async def Find(message: Message, state: FSMContext):
+    await state.set_state(WorkerState.find)
+    await message.answer("Начинаю поиск вакансий")
+    find_best_jobs_for_worker(message.chat.id)
