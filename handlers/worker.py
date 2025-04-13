@@ -53,7 +53,7 @@ async def anketasphere(callback: CallbackQuery, state: FSMContext):
     temp[callback.message.chat.id]["sphere"] = callback.data
     time.sleep(1)
     await state.set_state(WorkerState.work_experience)
-    await callback.message.answer("Укажите ваш опыт опыт работы в сфере (в годах)")
+    await callback.message.answer("Укажите ваш опыт опыт работы в сфере (в месяцах)")
 
 @worker_router.message(WorkerState.work_experience, F.text)
 async def anketaExp(message: Message, state: FSMContext):
@@ -101,3 +101,7 @@ async def anketaFind(callback: CallbackQuery, state: FSMContext):
         await state.set_state(WorkerState.find)
         await callback.message.answer("Начинаю поиск вакансий")
         await callback.message.answer("Ваш профиль успешно сохранён!")
+
+@worker_router.message(StateFilter(None))
+async def error(message: Message):
+    await message.answer("Пожалуйста, нажмите /start")
