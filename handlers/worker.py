@@ -19,23 +19,19 @@ from interface.anketa_writedb import *
 worker_router = Router()
 temp = {}
 
-@worker_router.message(WorkerState.wait)
-async def flood(message:Message):
-    await message.answer("Запрос генерируется.")
-
 @worker_router.callback_query(F.data == "worker")
 async def anketaStart(callback: CallbackQuery, state: FSMContext):
     await state.set_state(WorkerState.name)
     temp[callback.message.chat.id] = {}
     await callback.message.answer("Введите свое имя")
 
-@worker_router.message(WorkerState.name, F.text)
+@worker_router.message(StateFilter(WorkerState.name), F.text)
 async def anketaName(message: Message, state: FSMContext):
     temp[message.chat.id]["name"] = message.text
     await state.set_state(WorkerState.age)
     await message.answer("Введите свой возраст")
 
-@worker_router.message(WorkerState.age, F.text)
+@worker_router.message(StateFilter(WorkerState.age), F.text)
 async def anketaAge(message: Message, state: FSMContext):
     if message.text.isdigit() and 16 <= int(message.text) <= 100:
         temp[message.chat.id]["age"] = int(message.text)
@@ -69,12 +65,13 @@ async def anketaAbout(message:Message, state: FSMContext):
     response = await generate(message.text)
     temp[message.chat.id]["tags"] = response
     await message.answer(f"Мы определили ваши навыки так: {response}")
-    await state.set_state(WorkerState.wait)
-    kb = await buildInlineKB(["Попробывать снова", "Переписать текст", "Все верно"], ["retry", "rewrite", "continue"], 1)
-    await message.answer("все верно?", reply_markup=kb)
+    await state.set_state(WorkerState.find)
+    kb = await buildInlineKB(["Сгенерировать снова", "Переписать свое резюме", "Все верно"], ["retry", "rewrite", "continue"], 1)
+    await message.answefr("все верно?", reply_markup=kb)
 
-@worker_router.callback_query(F.data.in_(["retry", "rewrite", "continue"]), StateFilter(WorkerState.wait))
+@worker_router.callback_query(F.data.in_(["retry", "rewrite", "continue"]), StateFilter(WorkerState.find))
 async def anketaFind(callback: CallbackQuery, state: FSMContext):
+    print(callback.data)
     if callback.data == "retry":
         response = await generate(callback.text)
         temp[callback.message.chat.id]["tags"] = response

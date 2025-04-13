@@ -25,13 +25,13 @@ async def anketaStart(callback: CallbackQuery, state: FSMContext):
     await state.set_state(EmployerState.name_company)
     await callback.message.answer("Введите название компании")
 
-@employer_router.message(EmployerState.name_company, F.text)
+@employer_router.message(StateFilter(EmployerState.name_company), F.text)
 async def anketaName(message: Message, state: FSMContext):
     temp[message.chat.id]["name"] = message.text
     await state.set_state(EmployerState.age)
     await message.answer("Введите минимальный и максимальный возраст кандидата через пробел")
 
-@employer_router.message(EmployerState.age, F.text)
+@employer_router.message(StateFilter(EmployerState.age), F.text)
 async def anketaAge(message: Message, state: FSMContext):
     if message.text.split()[0].isdigit() and message.text.split()[1].isdigit():
         temp[message.chat.id] = list(map(int, (message.text).split()))
@@ -51,7 +51,7 @@ async def anketaStart(callback: CallbackQuery, state: FSMContext):
     await state.set_state(EmployerState.work_experience)
 
     
-@employer_router.message(EmployerState.work_experience, F.text)
+@employer_router.message(StateFilter(EmployerState.work_experience), F.text)
 async def anketaWorkExperience(message: Message, state: FSMContext):
     if message.text.split()[0].isdigit() and message.text.split()[1].isdigit():
         temp[message.chat.id]["employer_experience"] = message.text
