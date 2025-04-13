@@ -62,6 +62,7 @@ async def anketaExp(message: Message, state: FSMContext):
 @worker_router.message(WorkerState.about, F.text)
 async def anketaAbout(message:Message, state: FSMContext):
     await state.set_state(WorkerState.wait)
+    temp[message.chat.id]["about"] = message.text
     response = await generate(message.text)
     temp[message.chat.id]["tags"] = response
     await message.answer(f"Мы определили ваши навыки так: {response}")
@@ -90,7 +91,7 @@ async def anketaFind(callback: CallbackQuery, state: FSMContext):
             age=worker_data["age"],
             sphere=worker_data["sphere"],
             gender="",
-            about=worker_data.get("about", ""),
+            about=worker_data["about"],
             work_experience=worker_data["work_experience"],
             tags=worker_data["tags"],
             status="active"
