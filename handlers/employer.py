@@ -54,11 +54,40 @@ async def anketaWorkExperience(message: Message, state: FSMContext):
         await message.answer("Введите описание")
     else:
         await message.answer("Пожалуйста, введите корректный опыт работы.")
+    kb = await buildInlineKB(["Попробовать снова", "Переписать текст", "Все верно"], ["retry", "rewrite", "continue"], 1)
+    await message.answer("Все верно?", reply_markup=kb)
 
-@employer_router.message(EmployerState.about, F.text)
-async def anketaAbout(message: Message, state: FSMContext):
-    temp[message.chat.id]["about"] = message.text
-    await state.set_state(EmployerState.find)
-    response = await generate(message.text)
-    temp[message.chat.id]["tags"] = response
-    await message.answer(response)
+@employer_router.callback_query(F.data.in_(["retry", "rewrite", "continue"]), StateFilter(WorkerState.wait))
+async def anketaFind(callback: CallbackQuery, state: FSMContext):
+    if callback.data == "retry":
+        response = await generate(callback.text)
+        temp[callback.message.chat.id]["tags"] = response
+        await callback.message.answer(f"Мы определили нужные длдя вас навыки так:\n{response}")
+        kb = await buildInlineKB(["Попробывать снова", "Переписать текст", "Все верно"], ["retry", "rewrite", "continue"], 1)
+        await callback.message.answer("Все верно?", reply_markup=kb)
+    elif callback.data == "rewrite":
+        await state.set_state(WorkerState.about)
+        await callback.message.answer("Напишите пару слов о себе...")
+    else:
+        employer_data = temp[callback.message.chat.id]
+        await add_employer(
+        employer_id = callback.message.chat.id,
+        name_company = employer_data["name"],
+        age_min = employer_data["age"][0],
+        age_max = employer_data["age"][1],
+        sphere = employer_data.get("sphere", ""),
+        gender = employer_data.get("gender", "any"),
+        work_experience_min = int(employer_data["work_experience"].split()[0]),
+        work_experience_max = int(employer_data["work_experience"].split()[1]),
+        need_tags = response,
+        status = "find")
+
+
+
+
+
+
+
+
+
+
