@@ -4,6 +4,8 @@ from aiogram.filters import StateFilter
 from aiogram.types import CallbackQuery, Message, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
+from aiogram.filters import StateFilter
+from aiogram.filters.command import Command
 
 from constants.option import *
 from interface.inline_keyboard import buildInlineKB
@@ -133,11 +135,12 @@ async def anketaConfirm(callback: CallbackQuery, state: FSMContext):
                 status="find"
             )
             await callback.message.answer("Ваша анкета успешно сохранена!")
+            await callback.message.answer("Начинаю поиск работников после /find")
             await state.set_state(EmployerState.find)
         except Exception as e:
             await callback.message.answer(f"Ошибка при сохранении: {str(e)}")
 
-@employer_router.message(EmployerState.find, F.text)
+@employer_router.message(EmployerState.find, Command("find"))
 async def Find(message: Message, state: FSMContext):
     await state.set_state(EmployerState.find)
     await message.answer("Начинаю поиск работников")

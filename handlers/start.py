@@ -5,6 +5,7 @@ from aiogram.filters import StateFilter
 from aiogram.types import CallbackQuery, Message
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
+from aiogram.filters.command import Command
 
 from interface.button_keyboard import *
 from interface.inline_keyboard import *
