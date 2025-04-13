@@ -1,7 +1,7 @@
 from openai import AsyncOpenAI
 
 b = open("deepseek_core/text.txt", 'r')
-file_content = b.read().split()  # Читаем весь файл и сразу разбиваем по пробелам
+file_content = b.read().split()
 b.close()
 
 client = AsyncOpenAI(

@@ -6,7 +6,6 @@ from aiogram import types
 DB_NAME = 'work_db.db'
 
 async def create_db():
-    """Создание таблиц при первом запуске"""
     async with aiosqlite.connect(DB_NAME) as db:
         await db.execute('''
             CREATE TABLE IF NOT EXISTS workers (
@@ -41,8 +40,6 @@ async def create_db():
             )
         ''')
         await db.commit()
-
-# ========== Worker CRUD Operations ==========
 
 async def add_worker(
     worker_id: int,
@@ -88,7 +85,6 @@ async def add_worker(
         await db.commit()
 
 async def get_worker(worker_id: int) -> dict:
-    """Получение информации о работнике"""
     async with aiosqlite.connect(DB_NAME) as db:
         cursor = await db.execute('SELECT * FROM workers WHERE id = ?', (worker_id,))
         row = await cursor.fetchone()
@@ -109,7 +105,6 @@ async def get_worker(worker_id: int) -> dict:
         return None
 
 async def update_worker_status(worker_id: int, new_status: str):
-    """Обновление статуса работника"""
     async with aiosqlite.connect(DB_NAME) as db:
         await db.execute(
             'UPDATE workers SET status = ? WHERE id = ?',
@@ -118,7 +113,6 @@ async def update_worker_status(worker_id: int, new_status: str):
         await db.commit()
 
 async def add_to_worker_likes(worker_id: int, liked_id: int):
-    """Добавляем ID в likes работника"""
     async with aiosqlite.connect(DB_NAME) as db:
         cursor = await db.execute('SELECT likes FROM workers WHERE id = ?', (worker_id,))
         row = await cursor.fetchone()
@@ -135,7 +129,6 @@ async def add_to_worker_likes(worker_id: int, liked_id: int):
         return False
 
 async def add_to_worker_was_likes(worker_id: int, liked_by_id: int):
-    """Добавляем ID в was_likes работника"""
     async with aiosqlite.connect(DB_NAME) as db:
         cursor = await db.execute('SELECT was_likes FROM workers WHERE id = ?', (worker_id,))
         row = await cursor.fetchone()
@@ -151,7 +144,6 @@ async def add_to_worker_was_likes(worker_id: int, liked_by_id: int):
             return True
         return False
 
-# ========== Employer CRUD Operations ==========
 
 async def add_employer(
     employer_id: int,
@@ -167,7 +159,6 @@ async def add_employer(
     likes: list = None,
     was_likes: list = None
 ):
-    """Добавление/обновление работодателя"""
     likes = likes or []
     was_likes = was_likes or []
     
@@ -223,7 +214,6 @@ async def get_employer(employer_id: int) -> dict:
         return None
 
 async def add_to_employer_likes(employer_id: int, liked_id: int):
-    """Добавляем ID в likes работодателя"""
     async with aiosqlite.connect(DB_NAME) as db:
         cursor = await db.execute('SELECT likes FROM employers WHERE id = ?', (employer_id,))
         row = await cursor.fetchone()
@@ -240,7 +230,6 @@ async def add_to_employer_likes(employer_id: int, liked_id: int):
         return False
 
 async def add_to_employer_was_likes(employer_id: int, liked_by_id: int):
-    """Добавляем ID в was_likes работодателя"""
     async with aiosqlite.connect(DB_NAME) as db:
         cursor = await db.execute('SELECT was_likes FROM employers WHERE id = ?', (employer_id,))
         row = await cursor.fetchone()
@@ -256,10 +245,8 @@ async def add_to_employer_was_likes(employer_id: int, liked_by_id: int):
             return True
         return False
 
-# ========== Common Operations ==========
 
 async def get_all_active_workers():
-    """Получение всех активных работников"""
     async with aiosqlite.connect(DB_NAME) as db:
         cursor = await db.execute("SELECT * FROM workers WHERE status = 'active'")
         rows = await cursor.fetchall()
@@ -281,7 +268,6 @@ async def get_all_active_workers():
         ]
 
 async def get_all_active_employers():
-    """Получение всех активных работодателей"""
     async with aiosqlite.connect(DB_NAME) as db:
         cursor = await db.execute("SELECT * FROM employers WHERE status = 'active'")
         rows = await cursor.fetchall()
