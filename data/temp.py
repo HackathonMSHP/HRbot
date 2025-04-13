@@ -1,27 +1,39 @@
-
 import asyncio 
-
 from data.database import *
 from utilities.find import match_score
 
-
-
-
 employers = {}
 workers = {}
+koefs = {}
 
-
-
-async def find_best_workers_for_employer(employer_id: int, limit: int) -> list[dict]:
-    employer = await get_employer(employer_id)
-    if not employer:
-        return []
+async def initialize_data():
+    global employers, workers
     
     active_workers = await get_all_active_workers()
+    for worker in active_workers:
+        workers[worker["id"]] = worker
+    
+    active_employers = await get_all_active_employers()
+    for employer in active_employers:
+        employers[employer["id"]] = employer
+
+async def find_best_workers_for_employer(employer_id: int, limit: int) -> list[dict]:
+    if not employers or not workers:
+        await initialize_data()
+    
+    employer = employers.get(employer_id)
+    if not employer:
+        employer = await get_employer(employer_id)
+        if not employer:
+            return []
+        employers[employer_id] = employer
+    
     employer_tags = employer["need_tags"]
     
     scored_workers = []
-    for worker in active_workers:
+    for worker_id, worker in workers.items():
+        if worker["status"] != "active":
+            continue
         score = match_score(worker["tags"], employer_tags)
         scored_workers.append((worker, score))
     
@@ -30,21 +42,24 @@ async def find_best_workers_for_employer(employer_id: int, limit: int) -> list[d
     return [worker for worker, score in scored_workers[:limit]]
 
 async def find_best_jobs_for_worker(worker_id: int, limit: int) -> list[dict]:
-    worker = await get_worker(worker_id)
-    if not worker:
-        return []
+    if not employers or not workers:
+        await initialize_data()
     
-    active_employers = await get_all_active_employers()
+    worker = workers.get(worker_id)
+    if not worker:
+        worker = await get_worker(worker_id)
+        if not worker:
+            return []
+        workers[worker_id] = worker
+    
     worker_tags = worker["tags"]
     
     scored_jobs = []
-    for employer in active_employers:
+    for employer_id, employer in employers.items():
+        if employer["status"] != "active":
+            continue
         score = match_score(worker_tags, employer["need_tags"])
         scored_jobs.append((employer, score))
     
-
     scored_jobs.sort(key=lambda x: x[1], reverse=True)    
     return [employer for employer, score in scored_jobs[:limit]]
-
-
-koefs = {}

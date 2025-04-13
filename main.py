@@ -13,12 +13,14 @@ from handlers.worker import worker_router
 #from utils.db_connector import create_tables #, delete_tables, recreate_tables
 from constants.config import TOKEN
 from data.database import create_db
+from data.temp import initialize_data
 
 
 async def main() -> None:
     dp = Dispatcher()
     bot = Bot(TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     dp.include_routers(start_router, employer_router, worker_router)
+    await initialize_data()
     await dp.start_polling(bot)
 
 
