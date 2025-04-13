@@ -68,4 +68,22 @@ async def anketaAbout(message:Message, state: FSMContext):
     response = await generate(message.text)
     temp[message.chat.id]["tags"] = response
     await message.answer(f"Мы определили ваши навыки так: {response}")
-    await state.set_state(WorkerState.find)
+    await state.set_state(WorkerState.wait)
+    kb = await buildInlineKB(["Попробывать снова", "Переписать текст", "Все верно"], ["retry", "rewrite", "continue"], 1)
+    await message.answer("все верно?", reply_markup=kb)
+
+@worker_router.callback_query(F.data.in_(["retry", "rewrite", "continue"]), StateFilter(WorkerState.find))
+async def anketaFind(callback: CallbackQuery, state: FSMContext):
+    if callback.data == "retry":
+        response = await generate(callback.text)
+        temp[callback.chat.id]["tags"] = response
+        await callback.answer(f"Мы определили ваши навыки так: {response}")
+        await state.set_state(WorkerState.wait)
+        kb = await buildInlineKB(["Попробывать снова", "Переписать текст", "Все верно"], ["retry", "rewrite", "continue"], 1)
+        await callback.answer("все верно?", reply_markup=kb)
+    elif callback.data == "rewrite":
+        await state.set_state(WorkerState.about)
+        await callback.message.answer("Напишите пару слов о себе, о важных аспектах компании для вас, о конкретных фреймворках, языках, программах и т.д, опыт работы в которых вы имеете.")
+    else:
+        await state.set_state(WorkerState.find)
+        await callback.message.answer("Начинаю поиск вакансий")
