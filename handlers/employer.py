@@ -33,7 +33,7 @@ async def anketaName(message: Message, state: FSMContext):
 
 @employer_router.message(StateFilter(EmployerState.age), F.text)
 async def anketaAge(message: Message, state: FSMContext):
-    if message.text.split()[0].isdigit() and message.text.split()[1].isdigit():
+    if message.text.split()[0].isdigit() and message.text.split()[1].isdigit() and int(message.text.split()[0]) >= 16 and int(message.text.split()[1]) - int(message.text.split()[0]) >= 0:
         temp[message.chat.id] = list(map(int, (message.text).split()))
         await state.set_state(EmployerState.sphere)
         kb = await buildInlineKB(sphere_option, sphere_callback)
