@@ -53,7 +53,7 @@ async def anketasphere(callback: CallbackQuery, state: FSMContext):
     temp[callback.message.chat.id]["sphere"] = callback.data
     time.sleep(1)
     await state.set_state(WorkerState.work_experience)
-    await callback.message.answer("Укажите ваш опыт опыт работы в сфере (в годах)")
+    await callback.message.answer("Укажите ваш опыт опыт работы в сфере (в месяцах)")
 
 @worker_router.message(WorkerState.work_experience, F.text)
 async def anketaExp(message: Message, state: FSMContext):
@@ -78,7 +78,6 @@ async def anketaFind(callback: CallbackQuery, state: FSMContext):
         response = await generate(callback.text)
         temp[callback.message.chat.id]["tags"] = response
         await callback.message.answer(f"Мы определили ваши навыки так: {response}")
-        kb = await buildInlineKB(["Попробовать снова", "Переписать текст", "Все верно"], ["retry", "rewrite", "continue"], 1)
         kb = await buildInlineKB(["Сгенерировать снова", "Переписать свое резюме", "Все верно"], ["retry", "rewrite", "continue"], 1)
         await callback.message.answer("все верно?", reply_markup=kb)
     elif callback.data == "rewrite":
@@ -102,3 +101,7 @@ async def anketaFind(callback: CallbackQuery, state: FSMContext):
         await state.set_state(WorkerState.find)
         await callback.message.answer("Начинаю поиск вакансий")
         await callback.message.answer("Ваш профиль успешно сохранён!")
+
+@worker_router.message(StateFilter(None))
+async def error(message: Message):
+    await message.answer("Пожалуйста, нажмите /start")
