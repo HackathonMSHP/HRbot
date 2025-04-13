@@ -67,7 +67,7 @@ async def anketaAbout(message:Message, state: FSMContext):
     await message.answer(f"Мы определили ваши навыки так: {response}")
     await state.set_state(WorkerState.find)
     kb = await buildInlineKB(["Сгенерировать снова", "Переписать свое резюме", "Все верно"], ["retry", "rewrite", "continue"], 1)
-    await message.answefr("все верно?", reply_markup=kb)
+    await message.answer("все верно?", reply_markup=kb)
 
 @worker_router.callback_query(F.data.in_(["retry", "rewrite", "continue"]), StateFilter(WorkerState.find))
 async def anketaFind(callback: CallbackQuery, state: FSMContext):
