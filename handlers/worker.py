@@ -19,6 +19,7 @@ from data.temp import *
 
 worker_router = Router()
 temp = {}
+tt = {}
 
 @worker_router.callback_query(F.data == "worker")
 async def anketaStart(callback: CallbackQuery, state: FSMContext):
@@ -104,8 +105,59 @@ async def anketaFind(callback: CallbackQuery, state: FSMContext):
         await callback.message.answer("Ваш профиль успешно сохранён!")
         await callback.message.answer(await show_worker_profile(callback.message.chat.id))
 
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+
 @worker_router.message(WorkerState.find, F.text)
 async def Find(message: Message, state: FSMContext):
     await state.set_state(WorkerState.find)
     await message.answer("Начинаю поиск вакансий")
-    find_best_jobs_for_worker(message.chat.id)
+    
+    worker_id = message.chat.id
+    jobs = await find_best_jobs_for_worker(worker_id)
+    tt[worker_id] = jobs
+    
+    if not jobs:
+        await message.answer("Подходящих вакансий не найдено")
+        return
+    
+    worker = await get_worker(worker_id)
+    skipped = set(worker.get("skipped", []))
+    liked = set(worker.get("likes", []))
+    
+    for job in jobs:
+        if job["id"] in skipped or job["id"] in liked:
+            continue
+            
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="👍 Лайк", callback_data=f"like_emp_{job['id']}"),
+             InlineKeyboardButton(text="👎 Скип", callback_data=f"skip_emp_{job['id']}")]
+        ])
+        
+        await message.answer(
+            show_employer_profile(job),
+            reply_markup=keyboard
+        )
+        return
+    
+    await message.answer("Больше подходящих вакансий нет")
+
+@worker_router.callback_query(lambda c: c.data.startswith("like_emp_"))
+async def like_employer(callback: CallbackQuery):
+    worker_id = callback.message.chat.id
+    employer_id = int(callback.data.split("_")[2])
+    
+    await add_to_worker_likes(worker_id, employer_id)
+    await add_to_employer_was_likes(employer_id, worker_id)
+    
+    await callback.message.edit_reply_markup(reply_markup=None)
+    await callback.answer("Вы лайкнули эту вакансию")
+
+@worker_router.callback_query(lambda c: c.data.startswith("skip_emp_"))
+async def skip_employer(callback: CallbackQuery):
+    worker_id = callback.message.chat.id
+    employer_id = int(callback.data.split("_")[2])
+    
+    await add_to_worker_skipped(worker_id, employer_id)
+    
+    await callback.message.edit_reply_markup(reply_markup=None)
+    await callback.answer("Вакансия скрыта")
