@@ -14,8 +14,13 @@ from interface.callback_classes import *
 from data.data_classes import *
 from deepseek_core.middleware_openai import generate
 from data.database import *
+from data.temp import *
+from utilities.find import *
+from interface.anketa_writedb import *
 
 employer_router = Router()
+
+tt = {}
 
 @employer_router.callback_query(F.data == "employer")
 async def anketaStart(callback: CallbackQuery, state: FSMContext):
@@ -132,3 +137,58 @@ async def anketaConfirm(callback: CallbackQuery, state: FSMContext):
             await state.clear()
         except Exception as e:
             await callback.message.answer(f"Ошибка при сохранении: {str(e)}")
+
+@employer_router.message(EmployerState.find, F.text)
+async def Find(message: Message, state: FSMContext):
+    await state.set_state(EmployerState.find)
+    await message.answer("Начинаю поиск работников")
+    
+    employer_id = message.chat.id
+    workers_list = await find_best_workers_for_employer(employer_id)
+    tt[employer_id] = workers_list
+    
+    if not workers_list:
+        await message.answer("Подходящих работников не найдено")
+        return
+    
+    employer = await get_employer(employer_id)
+    skipped = set(employer.get("skipped", []))
+    liked = set(employer.get("likes", []))
+    
+    for worker in workers_list:
+        if worker["id"] in skipped or worker["id"] in liked:
+            continue
+            
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="👍 Лайк", callback_data=f"like_wrk_{worker['id']}"),
+             InlineKeyboardButton(text="👎 Скип", callback_data=f"skip_wrk_{worker['id']}")]
+        ])
+        
+        await message.answer(
+            show_worker_profile(worker),
+            reply_markup=keyboard
+        )
+        return
+    
+    await message.answer("Больше подходящих работников нет")
+
+@employer_router.callback_query(lambda c: c.data.startswith("like_wrk_"))
+async def like_worker(callback: CallbackQuery):
+    employer_id = callback.message.chat.id
+    worker_id = int(callback.data.split("_")[2])
+    
+    await add_to_employer_likes(employer_id, worker_id)
+    await add_to_worker_was_likes(worker_id, employer_id)
+    
+    await callback.message.edit_reply_markup(reply_markup=None)
+    await callback.answer("Вы лайкнули этого работника")
+
+@employer_router.callback_query(lambda c: c.data.startswith("skip_wrk_"))
+async def skip_worker(callback: CallbackQuery):
+    employer_id = callback.message.chat.id
+    worker_id = int(callback.data.split("_")[2])
+    
+    await add_to_employer_skipped(employer_id, worker_id)
+    
+    await callback.message.edit_reply_markup(reply_markup=None)
+    await callback.answer("Работник скрыт")

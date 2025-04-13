@@ -17,7 +17,7 @@ async def initialize_data():
     for employer in active_employers:
         employers[employer["id"]] = employer
 
-async def find_best_workers_for_employer(employer_id: int, limit: int) -> list[dict]:
+async def find_best_workers_for_employer(employer_id: int, limit: int) -> list[list]:
     if not employers or not workers:
         await initialize_data()
     
@@ -44,7 +44,7 @@ async def find_best_workers_for_employer(employer_id: int, limit: int) -> list[d
     
     return [worker for worker, score in scored_workers[:limit]]
 
-async def find_best_jobs_for_worker(worker_id: int, limit: int) -> list[dict]:
+async def find_best_jobs_for_worker(worker_id: int, limit: int) -> list[list]:
     if not employers or not workers:
         await initialize_data()
     
