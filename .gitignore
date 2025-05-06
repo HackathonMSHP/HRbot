@@ -7,3 +7,4 @@ config.py
 # Игнорировать директорию __pycache__
 __pycache__/
 constants/config.py
+constants/config.py
