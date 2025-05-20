@@ -1,2 +1,1 @@
-TOKEN = "7706273396:AAEBnL8IVl6tlOhAfjBn0sscAoIUfJRrc-A"
-AI_TOKEN = "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"
+#ЭТО ЗАПРЕЩЕНКА!!!!!
