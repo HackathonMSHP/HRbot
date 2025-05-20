@@ -2,7 +2,7 @@
 work_db.db
 
 # Игнорировать конфигурационный файл
-config.py
+constants/config.py
 
 # Игнорировать директорию __pycache__
 __pycache__/
