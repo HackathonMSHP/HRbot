@@ -1,5 +1,4 @@
 from openai import AsyncOpenAI
-from constants.config import AI_TOKEN
 
 b = open("deepseek_core/text.txt", 'r')
 file_content = b.read().split()
@@ -7,7 +6,7 @@ b.close()
 
 client = AsyncOpenAI(
     base_url="https://openrouter.ai/api/v1",
-    api_key=AI_TOKEN,
+    api_key="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",
 )
 
 async def generate(text: str):
