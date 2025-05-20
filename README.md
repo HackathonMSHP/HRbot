@@ -33,20 +33,25 @@ pip install -r requirements.txt
 cp .env.example .env
 # редактируем .env, добавляем наш токен
 ```
-6. Измените main.py и создайте базу данных:
-```python
-await create_db()
-```
-7. Запишите свой токен в config.py:
-8. Запустите бота:
+6. Запустите бота:
 ```bash
 python main.py
 ```
-9. Вносим измененения, тестируем, разбираемся как работает код, добавляем свои функции и т.д.
+7. Вносим измененения, тестируем, разбираемся как работает код, добавляем свои функции и т.д.
 ```bash
 git add .  # добавляем изменения в индекс
 git commit -m "Описание изменений"  # фиксируем изменения
 git push  # отправляем изменения на удаленный репозиторий
+```
+
+## Telegram Desktop
+
+Можно установить Телеграм на виртуалку:
+```bash
+# установка
+wget -O telegram.tar.xz https://telegram.org/dl/desktop/linux && tar xf telegram.tar.xz && sudo mv Telegram /opt/ && sudo ln -sf /opt/Telegram/Telegram /usr/local/bin/telegram
+# запуск
+telegram
 ```
 
 ## Полезные ссылки
@@ -54,3 +59,25 @@ git push  # отправляем изменения на удаленный ре
 - [Документация SQLAlchemy](https://docs.sqlalchemy.org/en/20/)
 - [Документация aiogram](https://docs.aiogram.dev/en/latest/)
 - [Документация Python](https://docs.python.org/3/)
+
+
+## Проблемы
+
+> Server certificate verification failed. CAfile: /etc/ssl/certs/ca-certificates.crt CRLfile: none
+
+На уровне системы
+```bash
+git config --global http.sslverify false
+```
+
+На уровне терминала
+```bash
+export GIT_SSL_NO_VERIFY=1
+```
+
+## Проверка качества кода
+
+```bash
+pip install pylint
+pylint --disable=C0114,R0903,C0116,C0115,R0901 **/*.py
+```
