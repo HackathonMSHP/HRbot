@@ -4,14 +4,12 @@ b = open("deepseek_core/text.txt", 'r')
 file_content = b.read().split()
 b.close()
 
-client = AsyncOpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key="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",
-)
+client = AsyncOpenAI(api_key="sk-367710cf716e4a9ebca1696e0a88f8ba", base_url="https://api.deepseek.com")
+
 
 async def generate(text: str):
     completion = await client.chat.completions.create(
-        model="deepseek/deepseek-chat",
+        model=" deepseek-chat",
         messages=[
             {
                 "role": "user",
@@ -27,3 +25,5 @@ async def generate(text: str):
     response_tags = response_content.split()
     ret = list(set(response_tags) & set(file_content))  # Пересечение тегов из ответа и файла
     return ret
+
+
